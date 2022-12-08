@@ -36,6 +36,9 @@
 #   -- Ignore the presence of untracked files when detecting if the
 #      working tree is dirty. This is set to FALSE by default.
 #
+#   GIT_DESCRIBE_ARGUMENTS (OPTIONAL)
+#   -- Arguments for git describe. This is set to "--always" by default.
+#
 # DESIGN
 #   - This script was designed similar to a Python application
 #     with a Main() function. I wanted to keep it compact to
@@ -85,6 +88,7 @@ CHECK_OPTIONAL_VARIABLE(GIT_STATE_FILE "${CMAKE_CURRENT_BINARY_DIR}/git-state-ha
 CHECK_OPTIONAL_VARIABLE(GIT_WORKING_DIR "${CMAKE_SOURCE_DIR}")
 CHECK_OPTIONAL_VARIABLE_NOPATH(GIT_FAIL_IF_NONZERO_EXIT TRUE)
 CHECK_OPTIONAL_VARIABLE_NOPATH(GIT_IGNORE_UNTRACKED FALSE)
+CHECK_OPTIONAL_VARIABLE_NOPATH(GIT_DESCRIBE_ARGUMENTS --always)
 
 # Check the optional git variable.
 # If it's not set, we'll try to find it using the CMake packaging system.
@@ -224,7 +228,8 @@ function(GetGitState _working_dir)
     endif()
 
     # Get output of git describe
-    RunGitCommand(describe --always ${object})
+    separate_arguments(GIT_DESCRIBE_ARGUMENTS)
+    RunGitCommand(describe ${GIT_DESCRIBE_ARGUMENTS})
     if(NOT exit_code EQUAL 0)
         set(ENV{GIT_DESCRIBE} "unknown")
     else()
@@ -341,6 +346,7 @@ function(SetupGitMonitoring)
             -DPOST_CONFIGURE_FILE=${POST_CONFIGURE_FILE}
             -DGIT_FAIL_IF_NONZERO_EXIT=${GIT_FAIL_IF_NONZERO_EXIT}
             -DGIT_IGNORE_UNTRACKED=${GIT_IGNORE_UNTRACKED}
+            -DGIT_DESCRIBE_ARGUMENTS="${GIT_DESCRIBE_ARGUMENTS}"
             -P "${CMAKE_CURRENT_LIST_FILE}")
 endfunction()
 
